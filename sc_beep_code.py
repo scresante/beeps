@@ -7,8 +7,6 @@ import board
 import digitalio
 import buttons
 from os import listdir
-# from adafruit_waveform.sine import sine_wave
-# from adafruit_waveform.square import square_wave 
 
 # enable the speaker
 speaker_enable = digitalio.DigitalInOut(board.SPEAKER_ENABLE)
@@ -26,7 +24,8 @@ def sine_wave(sample_frequency, pitch, vol=1.0):
         b[i] = int(b[i]*vol)
     return b
 
-def playtone(beepdata, samplerate=8000, waveform='sine', volume=0.3):
+def playtone(beepdata, samplerate=8000, waveform='sine', volume=0.5):
+    ''' tone format is for beepdata is freq, dur, delay!!1'''
     freq, duration, delay = beepdata
     # print(beepdata)
     # print("freq %i dur %i delay %i" % (freq,duration,delay))
@@ -39,14 +38,6 @@ def playtone(beepdata, samplerate=8000, waveform='sine', volume=0.3):
     time.sleep(duration/1000)
     audio.stop()
     time.sleep(delay/1000)
-
-test = eval(open('beeps/ff-victory.beep').read())
-
-
-initialize_tone = (200, 200, 0)
-        # tone format is freq, dur, delay!!!!!
-        # I should be using this in a more structural way but 
-        # how to even python
 
 def playfile(beepfile):
     with open(beepfile, 'r') as f:
@@ -77,7 +68,6 @@ def playintro(beepfile):
         for tone in read:
             playtone(qp(tone))
 
-
 def gen_cycle_beepfiles():
     beepfile_list = []
     for beepfile in listdir('beeps'):
@@ -86,13 +76,12 @@ def gen_cycle_beepfiles():
     while True:
         for f in beepfile_list:
             yield f
+
 beepfile = gen_cycle_beepfiles()
 
-playtone((200,100,0))
-playtone((500,100,0))
-
 # start on first file
-cur_file = playintro(next(beepfile))
+cur_file = next(beepfile)
+playintro(cur_file)
 
 while True:
     #design a menu system
@@ -100,12 +89,13 @@ while True:
         sleep(0.16)
         print('a')
         cur_file = next(beepfile)
-        print(cur_file)
+        print('selected', cur_file)
         playintro(cur_file)
 
     if buttons.B.value: #play it
         print('b')
         sleep(0.2)
+        print('playing', cur_file)
         playfile(cur_file)
         # because we don't know how to do interrupts in mainloops, 
         # implement interrupt back in playfile
