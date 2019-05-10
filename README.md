@@ -1,13 +1,7 @@
-_Installation_:
+_Description_
 
-copy these files to a mounted circuit python express (CPX)
+This is the master branch of my circuit playground express repo
 
-don't copy .git or .beep_source
+Different projects are stored in different branches, there is no code here.
 
-_Usage:_
-
-clone locally and copy to a mounted CPX
-
-button A cycles between melodies
-
-button B plays the melody and will stop playing
+To deploy, switch to a branch and copy the files.
