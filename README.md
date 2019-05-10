@@ -1,10 +1,7 @@
-This is actually my first attempt at a software stack for the 
- circuit python express gadget.
-Using a helper script to preprocess some external sources for 
- shell beep scripts, it plays fun music on a CPX.
+_Usage:_
 
-there's no need to include the source_beeps dir onto the CPX itself
+clone locally and copy to a mounted CPX
 
-obviously everything should have it's own deployment strategy
+button A cycles between melodies
 
-that isn't execing or importing
+button B plays the melody and will stop playing
