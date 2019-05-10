@@ -71,7 +71,8 @@ def playintro(beepfile):
 def gen_cycle_beepfiles():
     beepfile_list = []
     for beepfile in listdir('beeps'):
-        beepfile_list.append('beeps/' + beepfile)
+        if beepfile.find('0') != 0:
+            beepfile_list.append('beeps/' + beepfile)
     # print(beepfile)
     while True:
         for f in beepfile_list:
