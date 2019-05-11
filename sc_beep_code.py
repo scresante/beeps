@@ -24,15 +24,13 @@ def sine_wave(sample_frequency, pitch, vol=1.0):
         b[i] = int(b[i]*vol)
     return b
 
-def playtone(beepdata, samplerate=8000, waveform='sine', volume=0.5):
+def playtone(beepdata, samplerate=8000, waveform='sine', volume=1):
     ''' tone format is for beepdata is freq, dur, delay!!1'''
     freq, duration, delay = beepdata
     # print(beepdata)
     # print("freq %i dur %i delay %i" % (freq,duration,delay))
     if waveform == 'sine':
         wave_sample = audioio.RawSample(sine_wave(samplerate, freq, volume))
-    if waveform == 'square':
-        wave_sample = audioio.RawSample(square_wave(samplerate, freq))
     # repeat a wave sample for duration then wait for length
     audio.play(wave_sample, loop=True)
     time.sleep(duration/1000)
