@@ -14,8 +14,13 @@ speaker_enable.direction = digitalio.Direction.OUTPUT
 speaker_enable.value = True
 audio = audioio.AudioOut(board.A0)
 
+if buttons.S.value:
+    VOLUME=0.1
+else:
+    VOLUME=1.0
+
 # modified wave helpers from adafruit_waveform to allow for volume control
-def sine_wave(sample_frequency, pitch, vol=1.0):
+def sine_wave(sample_frequency, pitch, vol=VOLUME):
     """Generate a single sine wav cycle at the given sampling frequency and pitch."""
     length = int(sample_frequency / pitch)
     b = array.array("H", [0] * length)
@@ -24,7 +29,7 @@ def sine_wave(sample_frequency, pitch, vol=1.0):
         b[i] = int(b[i]*vol)
     return b
 
-def playtone(beepdata, samplerate=8000, waveform='sine', volume=1):
+def playtone(beepdata, samplerate=8000, waveform='sine', volume=VOLUME):
     ''' tone format is for beepdata is freq, dur, delay!!1'''
     freq, duration, delay = beepdata
     # print(beepdata)
