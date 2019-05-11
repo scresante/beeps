@@ -33,9 +33,9 @@ def playtone(beepdata, samplerate=8000, waveform='sine', volume=1):
         wave_sample = audioio.RawSample(sine_wave(samplerate, freq, volume))
     # repeat a wave sample for duration then wait for length
     audio.play(wave_sample, loop=True)
-    time.sleep(duration/1000)
+    sleep(duration/1000)
     audio.stop()
-    time.sleep(delay/1000)
+    sleep(delay/1000)
 
 def playfile(beepfile):
     with open(beepfile, 'r') as f:
@@ -44,7 +44,7 @@ def playfile(beepfile):
             playtone(tone)
             if buttons.B.value:
                 #TODO: use signals and debouncing
-                sleep(0.2)
+                time.sleep(0.2)
                 return
 
 def playintro(beepfile):
@@ -85,7 +85,7 @@ playintro(cur_file)
 while True:
     #design a menu system
     if buttons.A.value: #cycle
-        sleep(0.16)
+        time.sleep(0.16)
         print('a')
         cur_file = next(beepfile)
         print('selected', cur_file)
@@ -93,7 +93,7 @@ while True:
 
     if buttons.B.value: #play it
         print('b')
-        sleep(0.2)
+        time.sleep(0.2)
         print('playing', cur_file)
         playfile(cur_file)
         # because we don't know how to do interrupts in mainloops, 
