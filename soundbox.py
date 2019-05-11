@@ -2,14 +2,16 @@ import time
 import board
 from digitalio import DigitalInOut, Direction, Pull
 import audioio
-
-filename = "electrons.wav"
+from os import listdir
+from neopixel_demo import simpleCircle
 
 # The pad our button is connected to:
 button = DigitalInOut(board.A4)
 button.direction = Direction.INPUT
 button.pull = Pull.UP
 
+wavdir = 'menuwavs/'
+wavtestlist = [ wavdir+_ for _ in listdir(wavdir) ]
 
 # Audio Play File
 def play_file(playname):
@@ -22,6 +24,7 @@ def play_file(playname):
                 simpleCircle(.02)
     print("finished")
 
-while True:
-    if not button.value:
-        play_file(filename)
+for filename in wavtestlist[0:2]:
+# while True:
+    # if not button.value:
+    play_file(filename)

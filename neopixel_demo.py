@@ -1,5 +1,6 @@
 import neopixel
 import board
+import time
 pixels = neopixel.NeoPixel(board.NEOPIXEL, 10, brightness=1)
 # NeoPixel Animation
 def simpleCircle(wait):
