@@ -1,0 +1,4 @@
+@.beep_source/
+deploy.sh
+@.env
+@.fseventsd/
