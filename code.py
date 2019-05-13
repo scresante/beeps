@@ -1,3 +1,10 @@
-# exec(open('soundbox.py').read())
-# exec(open('neopixel_demo.py').read())
-exec(open('sc_beep_code.py').read())
+# import adafruit_irremote
+from adafruit_circuitplayground.express import cpx
+from time import sleep
+
+light = False
+while True:
+    print("temp: ", cpx.temperature)
+    light = not light
+    cpx.red_led = light
+    sleep(5)
