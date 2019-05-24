@@ -34,7 +34,7 @@ def simpleCircle(wait):
 light = True
 print("ON..............>>")
 
-while False:
+while True:
     if cpx.button_a:
         cpx.play_file('menuwavs/test.wav')
         cpx.red_led = light
@@ -56,9 +56,6 @@ while False:
     light = False
     cpx.red_led = light
 
-# non blocking looop demo
-import nonblocking_timer
-
 # G = (0, 100, 0)
 # O = (100, 100, 0)
 # R = (100, 0, 0)
@@ -69,25 +66,3 @@ import nonblocking_timer
         # while time.monotonic() - now < 0.5:
             # pass
 # pixels.fill(0)
-
-class BlinkDemo(nonblocking_timer):
-    def __init__(self):
-        super(BlinkDemo, self).__init__(0.1)
-        self.led = digitalio.DigitalInOut(board.D13)
-        self.led.direction = digitalio.Direction.OUTPUT
-        self.value = True
-
-    def stop(self):
-        self.led.value = False
-
-    def next(self):
-        if super(BlinkDemo, self).next():
-            self.led.value = not (self.led.value)
-
-blinkdemo.BlinkDemo()
-
-while True:
-    blinkDemo.next()
-    # This is the only place you should use time.sleep: to set the overall
-    # "sampling rate" of your program.
-    time.sleep(0.001)
