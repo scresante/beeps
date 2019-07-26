@@ -8,16 +8,6 @@ from time import sleep
 if sys.platform != 'Atmel SAMD21':
     sys.path.append('/home/shawn/Code/circuitpython/libs')
 
-# from digitalio import DigitalInOut, Direction, Pull
-# Speaker as haptic feedback
-# spkr_en = DigitalInOut(board.SPEAKER_ENABLE)
-# spkr_en.direction = Direction.OUTPUT
-# spkr_en.value = True
-# spkr = DigitalInOut(board.SPEAKER)
-# spkr.direction = Direction.OUTPUT
-# led = DigitalInOut(board.D13)
-# led.direction = Direction.OUTPUT
-
 def recv_ir():
 # Create a 'pulseio' input, to listen to infrared signals on the IR receiver
     pulsein = pulseio.PulseIn(board.IR_RX, maxlen=120, idle_state=True)
@@ -57,9 +47,6 @@ def tx_ir():
             encoder.transmit(pulseout, codes['mute'])
             print('button pressed, transmitting ' + str(codes['mute']))
         sleep(0.2)
-
-# pulses = pulseio.PulseIn(board.IR_RX, maxlen=120, idle_state=True)
-# decoder = adafruit_irremote.GenericDecode()
 
 led = False
 while True:
