@@ -5,20 +5,24 @@ import board
 import pulseio
 from time import sleep
 
-if sys.platform != 'Atmel SAMD21':
-    sys.path.append('/home/shawn/Code/circuitpython/libs')
+sys.path.append('/home/shawn/Code/circuitpython/libs')
 
 def recv_ir():
+    print('receiving')
 # Create a 'pulseio' input, to listen to infrared signals on the IR receiver
     pulsein = pulseio.PulseIn(board.IR_RX, maxlen=120, idle_state=True)
 # Create a decoder that will take pulses and turn them into numbers
     decoder = adafruit_irremote.GenericDecode()
 
     while True:
+        if cpx.button_a or cpx.button_b:
+            print('cancel')
+            pulsein.deinit()
+            return None
         pulses = decoder.read_pulses(pulsein)
         try:
             # Attempt to convert received pulses into numbers
-            received_code = decoder.decode_bits(pulses, debug=True)
+            received_code = decoder.decode_bits(pulses, debug=False)
         except adafruit_irremote.IRNECRepeatException:
             # We got an unusual short code, probably a 'repeat' signal
             print("NEC repeat!")
@@ -29,8 +33,10 @@ def recv_ir():
             continue
 
         print("NEC Infrared code received: ", received_code)
+        pulsein.deinit()
+        return(received_code)
 
-def tx_ir():
+def tx_ir(code):
 # Create a 'pulseio' output, to send infrared signals on the IR transmitter @ 38KHz
     pwm = pulseio.PWMOut(board.IR_TX, frequency=38000, duty_cycle=2 ** 15)
     pulseout = pulseio.PulseOut(pwm)
@@ -39,24 +45,30 @@ def tx_ir():
 
     codes = {"mute": [31, 31, 15, 240],
             "vol-": [31, 31, 47, 208],
-            "vol+": [31, 31, 31, 224],}
+            "vol+": [31, 31, 31, 224],
+            'power': [31, 31, 191, 64]}
 
-    while True:
-        break
-        if buttons.A.value or buttons.B.value:
-            encoder.transmit(pulseout, codes['mute'])
-            print('button pressed, transmitting ' + str(codes['mute']))
-        sleep(0.2)
+    encoder.transmit(pulseout, codes[code])
+    print(code + ' button pressed, transmitting ' + str(codes[code]))
+    pulseout.deinit()
+    pwm.deinit()
 
-led = False
+print('switch is: ' + str(cpx.switch))
+sw = {False: 'send', True: 'load'}
+
 while True:
-    if cpx.button_a:
-        print('stopping')
-        break
-    if cpx.button_b:
-        led = not led
-        cpx.red_led = led
-        while cpx.button_b:
-            pass
-    sleep(0.1)
-
+    if cpx.switch:
+        # capture mode
+        cpx.pixels.fill(0)
+        cpx.pixels[0] = [0,8,0]
+        code = recv_ir()
+        print(code)
+    else:
+        # transmit mode
+        cpx.pixels.fill(0)
+        cpx.pixels[9] = [8,0,0]
+        if cpx.button_a:
+            tx_ir('power')
+        if cpx.button_b:
+            tx_ir('mute')
+    sleep(0.05)
