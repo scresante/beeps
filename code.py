@@ -1,3 +1,4 @@
+# circpy 5.3.1 
 import sys
 import array
 from adafruit_circuitplayground import cp
@@ -39,7 +40,12 @@ encoder = adafruit_irremote.GenericTransmit(header=[4460, 4500], one=[573, 573],
 print('switch is: ' + str(cp.switch))
 sw = {False: 'send', True: 'load'}
 
+recv_ir = recv.recv_ir
+tx_ir = recv.tx_ir
+recv.recv_main()
+
 while True:
+    break
     if cp.button_a:
         print("Temp: ", cp.temperature)
         print("sending encoder mute")
