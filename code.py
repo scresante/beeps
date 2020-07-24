@@ -1,87 +1,81 @@
-# circpy 5.3.1 
-import sys
-import array
 from adafruit_circuitplayground import cp
+from time import sleep
 import board
 import pulseio
 import adafruit_irremote
-import time
-import recv
+import supervisor
+supervisor.disable_autoreload()
 
-pwm = pulseio.PWMOut(board.REMOTEOUT, frequency=38000,
-                     duty_cycle=2 ** 15, variable_frequency=True)
-pulseout = pulseio.PulseOut(pwm)
+def recv_ir():
+# use this function to grab codes from the remote
+    print('receiving')
+# Create a 'pulseio' input, to listen to infrared signals on the IR receiver
+    pulsein = pulseio.PulseIn(board.IR_RX, maxlen=120, idle_state=True)
+# Create a decoder that will take pulses and turn them into numbers
+    decoder = adafruit_irremote.GenericDecode()
 
-def samsung_power():
-    code = {'freq':38338,'delay':0.25,'repeat':2,'repeat_delay':0.046,'table':[[4460,4500],[573,1680],[573,567]],'index':[0,1,1,1,2,2,2,2,2,1,1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1,2,1,1,1,1,1,1,1]}
-    repeat = code['repeat']
-    delay = code['repeat_delay']
-    table = code['table']
-    pulses = []  # store the pulses here
-    # Read through each indexed element
-    for i in code['index']:
-        pulses += table[i]  # and add to the list of pulses
-    pulses.pop()  # remove one final 'low' pulse
+    while True:
+        pulses = decoder.read_pulses(pulsein)
+        try:
+            if not cp.switch:
+                pulsein.deinit()
+                return None
+            # Attempt to convert received pulses into numbers
+            received_code = decoder.decode_bits(pulses)
+        except adafruit_irremote.IRNECRepeatException:
+            # We got an unusual short code, probably a 'repeat' signal
+            print("NEC repeat!")
+            continue
+        except adafruit_irremote.IRDecodeException as e:
+            # Something got distorted or maybe its not an NEC-type remote?
+            print("Failed to decode: ", e.args)
+            continue
 
-    pwm.frequency = code['freq']
-    for i in range(repeat):
-        pulseout.send(array.array('H', pulses))
-        print(array.array('H', pulses))
-        time.sleep(delay)
+        print("NEC Infrared code received: ", received_code)
+        print("enter key: ",end='')
+        name = input()
+        pulsein.deinit()
+        return((name,received_code))
 
-codes = {"mute": [31, 31, 15, 240],
-        "vol-": [31, 31, 47, 208],
-        "vol+": [31, 31, 31, 224],
-        'power': [31, 31, 191, 64]}
+
+def tx_ir(code):
+    ''' dont use this, headers and timing bits are wrong for samsung '''
+# Create a 'pulseio' output, to send infrared signals on the IR transmitter @ 38KHz
+    pwm = pulseio.PWMOut(board.IR_TX, frequency=38000, duty_cycle=2 ** 15)
+    pulseout = pulseio.PulseOut(pwm)
 # Create an encoder that will take numbers and turn them into NEC IR pulses
-encoder = adafruit_irremote.GenericTransmit(header=[4460, 4500], one=[573, 573],
+    encoder = adafruit_irremote.GenericTransmit(header=[4460, 4500], one=[573, 573],
                                                     zero=[573, 1680], trail=0)
+    codes = {"mute": [31, 31, 15, 240],
+            "vol-": [31, 31, 47, 208],
+            "vol+": [31, 31, 31, 224],
+            'power': [31, 31, 191, 64]}
 
-print('switch is: ' + str(cp.switch))
-sw = {False: 'send', True: 'load'}
+    encoder.transmit(pulseout, codes[code])
+    print(code + ' button pressed, transmitting ' + str(codes[code]))
+    pulseout.deinit()
+    pwm.deinit()
 
-recv_ir = recv.recv_ir
-tx_ir = recv.tx_ir
-recv.recv_main()
-
-while True:
-    break
-    if cp.button_a:
-        print("Temp: ", cp.temperature)
-        print("sending encoder mute")
-        encoder.transmit(pulseout, codes['mute'])
-    if cp.button_b:
-        print("sending power")
-        samsung_power()
-    if cp.touch_A1:
-        pass
-    if cp.touch_A2:
-        print("sending encoder power")
-        encoder.transmit(pulseout, codes['power'])
-        pass
-    if cp.touch_A3:
-        pass
-    if cp.touch_A4:
-        print("sending encoder vol+")
-        encoder.transmit(pulseout, codes['vol+'])
-        pass
-    if cp.touch_A5:
-        pass
-    if cp.touch_A6:
-        pass
-    if cp.touch_A7:
-        print("sending encoder vol-")
-        encoder.transmit(pulseout, codes['vol-'])
-        pass
-    cp.red_led = cp.button_b
-    if cp.switch:
-        while cp.switch:
-            cp.pixels.fill((255,0,0))
-            cp.play_tone(100,0.2)
-            cp.pixels.fill((0,255,0))
-            cp.play_tone(100,0.2)
-            cp.pixels.fill((0,0,255))
-            cp.play_tone(100,0.2)
-    else:
-        cp.pixels.fill(0)
-
+def recv_main():
+    keydict = {}
+    while True:
+        if cp.switch:
+            # capture mode
+            cp.pixels.fill((0,30,10))
+            code = recv_ir()
+            if code:
+                # store the tuple as the keypress description
+                keydict[code[0]] = code[1]
+            else:
+                # code is None? print keydict and die
+                print(keydict)
+                break
+            # print(code)
+        else:
+            # transmit mode
+            cp.pixels.fill((30,0,0))
+            if cp.button_a:
+                tx_ir('power')
+            if cp.button_b:
+                tx_ir('mute')
+        sleep(0.05)
