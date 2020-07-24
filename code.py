@@ -79,3 +79,5 @@ def recv_main():
             if cp.button_b:
                 tx_ir('mute')
         sleep(0.05)
+
+recv_main()
