@@ -10,16 +10,16 @@ supervisor.disable_autoreload()
 
 def recv_ir():
 # use this function to grab codes from the remote
-    # Create a 'pulseio' input, to listen to infrared signals on the IR receiver
+    print('receiving')
+# Create a 'pulseio' input, to listen to infrared signals on the IR receiver
     pulsein = pulseio.PulseIn(board.IR_RX, maxlen=120, idle_state=True)
-    # Create a decoder that will take pulses and turn them into numbers
+# Create a decoder that will take pulses and turn them into numbers
     decoder = adafruit_irremote.GenericDecode()
 
     while True:
         pulses = decoder.read_pulses(pulsein)
         try:
             if not cp.switch:
-                # switch will break out of loop and change mode
                 pulsein.deinit()
                 return None
             # Attempt to convert received pulses into numbers
@@ -33,12 +33,11 @@ def recv_ir():
             print("Failed to decode: ", e.args)
             continue
 
-        # print("NEC Infrared code received: ", received_code)
+        print("NEC Infrared code received: ", received_code)
         print("enter key: ",end='')
         name = input()
-        # keydict[name] = received_code
         pulsein.deinit()
-        return('"{}": {},'.format(name,received_code))
+        return((name,received_code))
 
 
 def tx_ir(code):
@@ -60,12 +59,20 @@ def tx_ir(code):
     pwm.deinit()
 
 def recv_main():
+    keydict = {}
     while True:
         if cp.switch:
             # capture mode
             cp.pixels.fill((0,30,10))
             code = recv_ir()
-            print(code)
+            if code:
+                # store the tuple as the keypress description
+                keydict[code[0]] = code[1]
+            else:
+                # code is None? print keydict and die
+                print(keydict)
+                break
+            # print(code)
         else:
             # transmit mode
             cp.pixels.fill((30,0,0))
