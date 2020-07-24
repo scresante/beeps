@@ -52,7 +52,7 @@ from time import sleep
     # pulseout.deinit()
     # pwm.deinit()
 
-pwm = pulseio.PWMOut(board.IR_TX, frequency=38000, duty_cycle=2 ** 15)
+pwm = pulseio.PWMOut(board.IR_TX, frequency=38338, duty_cycle=2 ** 15)
 pulseout = pulseio.PulseOut(pwm)
 # Create an encoder that will take numbers and turn them into NEC IR pulses
 encoder = adafruit_irremote.GenericTransmit(header=[9500, 4500], one=[550, 550],
